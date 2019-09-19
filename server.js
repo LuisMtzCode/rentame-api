@@ -28,9 +28,20 @@ app.use(express.json());
 app.use("/products", productsApi);
 app.use("/users", usersApi);
 
+//Featured Products
 app.get('/', (req, res) => {
-  res.send('Server online');    
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("rentame");
+    var query = { isFeatured: "true" };
+    dbo.collection("products").find(query).toArray(function(err, result) {
+      if (err) throw err; 
+      res.send(result)
+      db.close();
+    });
+  }); 
 });
+
 
 app.post('/login',(req, res) => {
   MongoClient.connect(url, function(err, db) {
@@ -49,6 +60,21 @@ app.post('/login',(req, res) => {
     
   }); 
 });
+
+//Hardcoded simple login
+// app.post("/", function(req, res, next) {
+//   var id = req.body.user;
+//   var pw = req.body.password;
+
+//   if(id == "admin" && pw == "admin") {
+//       console.log("loginSuccess")
+//       res.send("loginSuccess");
+//   }
+//   else {
+//     console.log("loginFail")
+//       res.send("loginFail");
+//   }
+// });
 
 app.listen(8000,() => {
     console.log('server online');    

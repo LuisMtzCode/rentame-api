@@ -17,9 +17,21 @@ router.get('/', (req, res) => {
     console.log("Consulta de producto correcta");
 });
 
+router.get('/:productId', (req, res) => {
+   MongoClient.connect(url, function(err, db) {
+     if (err) throw err;
+     var dbo = db.db("rentame");
+     dbo.collection("products").findOne({productId:req.params.productId}, function(err, result) {
+       if (err) throw err;
+       res.send(result)
+       db.close();
+     });
+   });
+  console.log("Consulta de producto correcta");
+});
 
 
-router.post('/', (req, res) => {
+router.post('/add', (req, res) => {
 
     MongoClient.connect(url, function(err, db) {
         if (err) throw err;
@@ -38,9 +50,11 @@ router.put('/', (req, res) => {
     MongoClient.connect(url, function(err, db) {
         if (err) throw err;
         var dbo = db.db("rentame");
-        var myquery = {product:req.body.product}
+        var myquery = {productId:req.body.productId}
         var newvalues = { $set: {title:req.body.title, description:req.body.description, img:req.body.img, 
-                                img_alt:req.body.img_alt, product:req.body.product,isFeatured:req.body.isFeatured  } };
+                                img_alt:req.body.img_alt, productId:req.body.productId,isFeatured:req.body.isFeatured,  
+                                price:req.body.price, brand:req.body.brand, status:req.body.status,
+                                availableStart:req.body.availableStart, availableEnd:req.body.availableEnd} };
         dbo.collection("products").updateOne(myquery, newvalues, function(err, res) {
           if (err) throw err;
           console.log("producto actualizado");
@@ -55,7 +69,7 @@ router.delete('/', (req, res) => {
     MongoClient.connect(url, function(err, db) {
         if (err) throw err;
         var dbo = db.db("rentame");
-        var myquery = {product:req.body.product}
+        var myquery = {product:req.body.productId}
         dbo.collection("products").deleteOne(myquery, function(err, obj) {
           if (err) throw err;
           console.log("producto eliminado");
