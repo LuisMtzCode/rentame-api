@@ -39,7 +39,7 @@ app.post('/login',(req, res) => {
     console.log('req-body', req.body);
     const user = dbo.collection("users").findOne(req.body).then((result)=> {
       console.log('user', result);
-      const { firstName,  lastName } = result;
+      const { email, firstName,  lastName } = result;
       res.send({ email, firstName,  lastName });
       db.close();
     }).catch(err => {
