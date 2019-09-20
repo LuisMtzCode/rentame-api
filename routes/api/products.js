@@ -4,17 +4,57 @@ const router = express.Router();
 var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb+srv://admin:admin@cluster0-w0g03.mongodb.net/test?retryWrites=true&w=majority";
 
-router.get('/', (req, res) => {
+//Rent Products
+router.post('/rent/add', (req, res) => {
+  MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      var dbo = db.db("rentame");
+      dbo.collection("rent_products").insertOne(req.body, function(err, res) {
+        if (err) throw err;
+        console.log("producto insertado");
+        db.close();
+      });
+    });
+  res.send (req.body)
+});
+
+router.get('/categories', (req, res) => {
     MongoClient.connect(url, function(err, db) {
         if (err) throw err;
         var dbo = db.db("rentame"); 
-        dbo.collection("products").find({}).toArray(function(err, result) {
+        dbo.collection("products").aggregate([
+          {
+            $group : {
+              _id: { category: "$category" },
+            },
+          },
+          {
+            $sort : {"_id.category": 1}
+          }
+        ]).toArray(function(err, result) {
           if (err) throw err;
-          res.send(result)
+          let data = [];
+          result.forEach(category => {
+            data.push(category._id.category);
+          });
+          res.send(data)
           db.close();
         });
       }); 
     console.log("Consulta de producto correcta");
+});
+
+router.get('/', (req, res) => {
+  MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      var dbo = db.db("rentame"); 
+      dbo.collection("products").find({}).toArray(function(err, result) {
+        if (err) throw err;
+        res.send(result)
+        db.close();
+      });
+    }); 
+  console.log("Consulta de producto correcta");
 });
 
 router.get('/:productId', (req, res) => {

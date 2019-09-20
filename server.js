@@ -42,6 +42,18 @@ app.get('/', (req, res) => {
   }); 
 });
 
+app.get('/rents', (req, res) => {
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("rentame");
+    var query = {};
+    dbo.collection("rent_products").find(query).toArray(function(err, result) {
+      if (err) throw err; 
+      res.send(result)
+      db.close();
+    });
+  }); 
+});
 
 app.post('/login',(req, res) => {
   MongoClient.connect(url, function(err, db) {
